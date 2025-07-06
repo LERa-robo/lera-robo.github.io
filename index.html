@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="LERa: Replanning with Visual Feedback in Instruction Following.">
+  <meta name="keywords" content="LERa, Robotics, VLM, Replanning, IROS2025">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LERa: Replanning with Visual Feedback in Instruction Following</title>
+
+  <!-- Внешние стили и скрипты как в шаблоне nerfies.github.io -->
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <style>
+    /* Unified table styling - fit tables on screen without scrolling */
+    .table-container {
+      width: 100%;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+    
+    .table-container table {
+      width: 100%;
+      font-size: 0.9rem; /* Slightly smaller font to fit more content */
+      border-collapse: collapse;
+      margin: 0;
+      table-layout: auto; /* Allow automatic column sizing */
+    }
+    
+    /* Ensure all tables have consistent styling */
+    .table {
+      font-size: 0.9rem !important;
+      width: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: auto !important;
+    }
+    
+    /* Remove any Bulma classes that might interfere */
+    .is-fullwidth {
+      width: 100% !important;
+      max-width: none !important;
+    }
+    
+    /* Ensure table cells are properly sized and compact */
+    .table th,
+    .table td {
+      padding: 0.3rem 0.2rem !important; /* Smaller padding to fit more content */
+      text-align: center !important;
+      border: 1px solid #dbdbdb !important;
+      white-space: nowrap; /* Prevent text wrapping */
+      font-size: 0.85rem; /* Even smaller font for data cells */
+    }
+    
+    /* Make table headers slightly larger for readability */
+    .table th {
+      font-size: 0.9rem !important;
+      font-weight: bold !important;
+    }
+    
+    /* Responsive handling */
+    @media (max-width: 768px) {
+      .table-container {
+        margin: 1rem 0;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.2rem 0.1rem !important;
+        font-size: 0.75rem !important;
+      }
+      
+      .table th {
+        font-size: 0.8rem !important;
+      }
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#">
+        <span class="icon">
+            <i class="fas fa-home"></i>
+        </span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">LERa: Replanning with Visual Feedback in Instruction Following</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Svyatoslav Pchelintsev<sup>1*</sup>,</span>
+            <span class="author-block">Maxim Patratskiy<sup>1*</sup>,</span>
+            <span class="author-block">Anatoly Onishchenko<sup>1</sup>,</span>
+            <span class="author-block">Alexandr Korchemnyi<sup>1</sup>,</span>
+            <span class="author-block">Aleksandr Medvedev<sup>2</sup>,</span>
+            <span class="author-block">Uliana Vinogradova<sup>2</sup>,</span>
+            <span class="author-block">Ilya Galuzinsky<sup>2</sup>,</span>
+            <span class="author-block">Aleksey Postnikov<sup>2</sup>,</span>
+            <span class="author-block">Alexey K. Kovalev<sup>1,3</sup>,</span>
+            <span class="author-block">Aleksandr I. Panov<sup>1,3</sup></span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>MIPT, Dolgoprudny, Russia,</span>
+            <span class="author-block"><sup>2</sup>Sberbank Robotics Center, Moscow, Russia,</span>
+            <span class="author-block"><sup>3</sup>AIRI, Moscow, Russia</span>
+            <span class="author-block"><br>*Equal contribution</span>
+          </div>
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="IROS2025___Extra_LERa%20(3).pdf" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/AmpiroMax/LERa?tab=readme-ov-file#-custom-tasks" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <h2 class="subtitle has-text-centered">
+        LERa is a robust and adaptable solution for error-aware task execution in robotics.
+      </h2>
+      <!-- Illustration of LERa example (figure) -->
+      <div class="has-text-centered" style="margin-top: 2rem;">
+        <!-- The image path should be relative to the site root for web usage -->
+        <img src="images/fig2_example_cr.png" alt="LERa Example Figure" style="max-width: 100%; height: auto;">
+        <!-- If PDF is not supported by browser, consider converting to PNG/JPG for web -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Large Language Models are increasingly used in robotics for task planning, but their reliance on textual inputs limits their adaptability to real-world changes and failures. To address these challenges, we propose LERa &mdash; <u>L</u>ook, <u>E</u>xplain, <u>R</u>epl<u>a</u>n &mdash; a Visual Language Model-based replanning approach that utilizes visual feedback. Unlike existing methods, LERa requires only a raw RGB image, a natural language instruction, an initial task plan, and failure detection&mdash;without additional information such as object detection or predefined conditions that may be unavailable in a given scenario. The replanning process consists of three steps: (i) Look, where LERa generates a scene description and identifies errors; (ii) Explain, where it provides corrective guidance; and (iii) Replan, where it modifies the plan accordingly. LERa is adaptable to various agent architectures and can handle errors from both dynamic scene changes and task execution failures. We evaluate LERa on the newly introduced ALFRED-ChaOS and VirtualHome-ChaOS datasets, achieving a 40% improvement over baselines in dynamic environments. In tabletop manipulation tasks with a predefined probability of task failure within the PyBullet simulator, LERa improves success rates by up to 67%. Further experiments, including real-world trials with a tabletop manipulator robot, confirm LERa's effectiveness in replanning. We demonstrate that LERa is a robust and adaptable solution for error-aware task execution in robotics.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+    <!-- Video (оставлен один блок) -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <!-- <h2 class="title is-3">LERa across different</h2> -->
+        <div class="publication-video">
+          <video controls width="100%" style="max-width: 800px;">
+            <source src="./videos/overall.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+    <!--/ Video. -->
+  </div>
+</section>
+<!-- Experimental tables from LaTeX results section -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Experimental Results</h2>
+        <div class="content has-text-justified">
+          <!-- Main agent/environment table -->
+          <div class="table-container">
+            <table class="table is-striped is-fullwidth">
+              <caption>Replanning results for different agents and environments.</caption>
+              <thead>
+                <tr>
+                  <th rowspan="2">Agent</th>
+                  <th colspan="3">ALFRED-ChaOS (Seen)</th>
+                  <th colspan="3">ALFRED-ChaOS (Unseen)</th>
+                  <th colspan="3">VirtualHome-ChaOS</th>
+                  <th colspan="3">PyBullet (gpt4o)</th>
+                  <th colspan="3">PyBullet (Gemini)</th>
+                </tr>
+                <tr>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Oracle</td>
+                  <td>33.04</td><td>50.04</td><td>-</td>
+                  <td>31.65</td><td>51.71</td><td>-</td>
+                  <td>50.00</td><td>85.75</td><td>-</td>
+                  <td>19.00</td><td>32.50</td><td>-</td>
+                  <td>19.00</td><td>32.50</td><td>-</td>
+                </tr>
+                <tr>
+                  <td>O-Ra</td>
+                  <td>34.38</td><td>51.19</td><td>7.69</td>
+                  <td>34.17</td><td>54.08</td><td>14.16</td>
+                  <td>50.00</td><td>84.33</td><td>0.00</td>
+                  <td>53.00</td><td>61.58</td><td>39.13</td>
+                  <td>56.00</td><td>73.67</td><td>46.39</td>
+                </tr>
+                <tr>
+                  <td>O-ERa</td>
+                  <td>40.18</td><td>56.40</td><td>37.08</td>
+                  <td>42.81</td><td>61.81</td><td>33.33</td>
+                  <td>50.00</td><td>85.92</td><td>0.00</td>
+                  <td>75.00</td><td>80.50</td><td>71.24</td>
+                  <td>72.00</td><td>78.25</td><td>65.65</td>
+                </tr>
+                <tr>
+                  <td>O-LRa</td>
+                  <td>34.38</td><td>51.00</td><td>6.73</td>
+                  <td>33.45</td><td>53.57</td><td>11.01</td>
+                  <td>93.00</td><td>97.04</td><td>87.00</td>
+                  <td><b>79.00</b></td><b><td>83.33</td><td>73.71</td></b>
+                  <td><b>87.00</b></td><b><td>92.92</td><td>85.81</td></b>
+                </tr>
+                <tr>
+                  <td>Baseline</td>
+                  <td>33.04</td><td>50.15</td><td>3.15</td>
+                  <td>32.01</td><td>51.89</td><td>0.98</td>
+                  <td>52.00</td><td>85.91</td><td>4.10</td>
+                  <td>67.00</td><td>74.92</td><td>59.06</td>
+                  <td>82.00</td><td>89.08</td><td>78.90</td>
+                </tr>
+                <tr>
+                  <td>O-LERa</td>
+                  <td><b>49.55</b></td><b><td>64.55</td><td>73.39</td></b>
+                  <td><b>53.60</b></td><b><td>70.23</td><td>74.57</td></b>
+                  <td><b>94.06</b></td><b><td>98.17</td><td>95.03</td></b>
+                  <td>67.00</td><td>72.67</td><td>61.29</td>
+                  <td>86.00</td><td>89.17</td><td>84.83</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <br>
+          <!-- VLM comparison table -->
+          <div class="table-container">
+            <table class="table is-striped is-fullwidth">
+              <caption>Performance of LERa with different VLMs across different environments.</caption>
+              <thead>
+                <tr>
+                  <th rowspan="2">VLM</th>
+                  <th colspan="3">ALFRED-ChaOS (Seen)</th>
+                  <th colspan="3">ALFRED-ChaOS (Unseen)</th>
+                  <th colspan="3">VirtualHome-ChaOS</th>
+                  <th colspan="3">PyBullet</th>
+                </tr>
+                <tr>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                  <th>SR↑</th><th>GCR↑</th><th>SRep↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LLaMA-3.2-11b</td>
+                  <td>35.71</td><td>52.01</td><td>11.11</td>
+                  <td>33.81</td><td>53.81</td><td>9.38</td>
+                  <td>52.00</td><td>74.17</td><td>20.00</td>
+                  <td>34.00</td><td>45.92</td><td>20.54</td>
+                </tr>
+                <tr>
+                  <td>LLaMA-3.2-90b</td>
+                  <td>38.84</td><td>54.80</td><td>30.58</td>
+                  <td>36.33</td><td>55.97</td><td>25.93</td>
+                  <td>54.00</td><td>84.25</td><td>8.00</td>
+                  <td>64.00</td><td>71.08</td><td>57.68</td>
+                </tr>
+                <tr>
+                  <td>Gemini-Flash-1.5</td>
+                  <td>46.43</td><td>61.61</td><td>67.22</td>
+                  <td>51.44</td><td>68.38</td><td>67.71</td>
+                  <td>59.40</td><td>72.51</td><td>24.00</td>
+                  <td>55.00</td><td>66.33</td><td>46.75</td>
+                </tr>
+                <tr>
+                  <td>Gemini-Pro-1.5</td>
+                  <td>42.19</td><td>56.51</td><td>56.16</td>
+                  <td>46.40</td><td>63.85</td><td>55.64</td>
+                  <td>65.35</td><td>87.87</td><td>41.58</td>
+                  <td><b>86.00</b></td><b><td>89.17</td><td>84.83</td></b>
+                </tr>
+                <tr>
+                  <td>gpt-4o-mini</td>
+                  <td>43.75</td><td>59.71</td><td>46.81</td>
+                  <td>46.04</td><td>63.97</td><td>49.12</td>
+                  <td>74.25</td><td>82.50</td><td>56.25</td>
+                  <td>48.00</td><td>62.92</td><td>37.75</td>
+                </tr>
+                <tr>
+                  <td>gpt-4o</td>
+                  <td><b>49.55</b></td><b><td>64.55</td><td>73.39</td></b>
+                  <td><b>53.60</b></td><b><td>70.23</td><td>74.57</td></b>
+                  <td><b>94.06</b></td><b><td>98.17</td><td>95.03</td></b>
+                  <td>67.00</td><td>72.67</td><td>61.29</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Additional table: The impact of the imperfect checker on replanning -->
+          <div class="table-container">
+            <table class="table is-striped is-fullwidth">
+              <caption style="caption-side: top; text-align: left; font-weight: bold;">
+                The impact of the imperfect checker on replanning.
+              </caption>
+              <thead>
+                <tr>
+                  <th rowspan="2">Agent</th>
+                  <th colspan="3">Seen split</th>
+                  <th colspan="3">Unseen split</th>
+                </tr>
+                <tr>
+                  <th>SR↑</th>
+                  <th>GSR↑</th>
+                  <th>SRep↑</th>
+                  <th>SR↑</th>
+                  <th>GSR↑</th>
+                  <th>SRep↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>O-15</td>
+                  <td>12.50</td>
+                  <td>35.90</td>
+                  <td>-</td>
+                  <td>12.95</td>
+                  <td>39.75</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>O-10</td>
+                  <td>17.41</td>
+                  <td>40.89</td>
+                  <td>-</td>
+                  <td>17.63</td>
+                  <td>43.38</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>O-05</td>
+                  <td>24.55</td>
+                  <td>45.01</td>
+                  <td>-</td>
+                  <td>24.82</td>
+                  <td>47.54</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>O-FC</td>
+                  <td>33.04</td>
+                  <td>50.04</td>
+                  <td>-</td>
+                  <td>31.65</td>
+                  <td>51.71</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>O-L-15</td>
+                  <td>22.32</td>
+                  <td>44.42</td>
+                  <td>35.48</td>
+                  <td>20.50</td>
+                  <td>45.29</td>
+                  <td>25.00</td>
+                </tr>
+                <tr>
+                  <td>O-L-10</td>
+                  <td>25.45</td>
+                  <td>46.91</td>
+                  <td>47.32</td>
+                  <td>25.18</td>
+                  <td>48.95</td>
+                  <td>28.70</td>
+                </tr>
+                <tr>
+                  <td>O-L-05</td>
+                  <td>34.38</td>
+                  <td>52.57</td>
+                  <td><b>54.16</b></td>
+                  <td>35.97</td>
+                  <td>55.76</td>
+                  <td>35.43</td>
+                </tr>
+                <tr>
+                  <td>O-L-FC</td>
+                  <td><b>44.64</b></td>
+                  <td><b>59.00</b></td>
+                  <td>52.83</td>
+                  <td><b>46.76</b></td>
+                  <td><b>63.46</b></td>
+                  <td><b>49.34</b></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-4 has-text-centered" style="margin-bottom: 2rem;">Real Robot Experiments</h2>
+    <div class="columns is-centered">
+      <!-- Video 1 -->
+      <div class="column has-text-centered">
+        <video controls style="width: 100%; max-width: 250px;">
+          <source src="./videos/real_robot_1.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <!-- Video 2 -->
+      <div class="column has-text-centered">
+        <video controls style="width: 100%; max-width: 250px;">
+          <source src="./videos/real_robot_2.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <!-- Video 3 -->
+      <div class="column has-text-centered">
+        <video controls style="width: 100%; max-width: 250px;">
+          <source src="./videos/real_robot_3.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <!-- Video 4 -->
+      <div class="column has-text-centered">
+        <video controls style="width: 100%; max-width: 250px;">
+          <source src="./videos/real_robot_4.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{patratskiy2025lera,
+  title={LERa: Replanning with Visual Feedback in Instruction Following},
+  author={Pchelintsev, Svyatoslav and Patratskiy, Maxim and Onishchenko, Anatoly and Korchemnyi, Alexandr and Medvedev, Aleksandr and Vinogradova, Uliana and Galuzinsky, Ilya and Postnikov, Aleksey and Kovalev, Alexey K. and Panov, Aleksandr I.},
+  booktitle={IROS 2025},
+  year={2025}
+}
+    </code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://github.com/AmpiroMax" class="external-link">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            The source code for the current website template can be found at: <a href="https://github.com/nerfies/nerfies.github.io">https://github.com/nerfies/nerfies.github.io</a>.
+          </p>
+          <p>
+            This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
